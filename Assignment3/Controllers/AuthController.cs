@@ -31,13 +31,35 @@ namespace Assignment3.Controllers
 
 
 
-
-
-
         [HttpPost("login")]
         public ActionResult Login(UserForLogin userForLogin)
         {
             var userToLogin = _userService.Login(userForLogin);
+            if (userToLogin == null)
+            {
+                return BadRequest("User not found");
+            }
+
+            return Ok(userToLogin);
+        }
+
+        [HttpPost("VulnerableRegister")]
+        public ActionResult VulnerableRegister(UserForRegister userForRegister)
+        {
+            var userToRegister = _userService.VulnerableRegister(userForRegister);
+            if (userToRegister)
+            {
+                return Ok(userToRegister);
+
+            }
+
+            return BadRequest("Registeration Failed");
+        }
+
+        [HttpPost("VulnerableLogin")]
+        public ActionResult VulnerableLogin(UserForLogin userForLogin)
+        {
+            var userToLogin = _userService.VulnerableLogin(userForLogin);
             if (userToLogin == null)
             {
                 return BadRequest("User not found");

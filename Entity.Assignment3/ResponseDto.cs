@@ -10,9 +10,7 @@ namespace Entity.Assignment3
     {
         public bool HasError { get; set; }
         public string Message { get; set; } = null!;
-        public string Token { get; set; } = null!;
-
-        public string userName { get; set; } = null!;
+       
         public string IdentityNumber { get; set; } = null!;
     }
 }

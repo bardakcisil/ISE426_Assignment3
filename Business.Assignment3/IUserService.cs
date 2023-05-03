@@ -12,8 +12,8 @@ namespace Business.Assignment3
     {
         ResponseDto Login(UserForLogin userForLogin);
         bool Register(UserForRegister userForRegister);
+        ResponseDto VulnerableLogin(UserForLogin userForLogin);
+        bool VulnerableRegister(UserForRegister userForRegister);
 
-
-        //  ResponseDto Login(UserForLogin userForLogin);
     }
 }

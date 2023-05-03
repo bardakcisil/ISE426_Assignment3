@@ -46,12 +46,42 @@ namespace Business.Assignment3
             else
             {
 
-                //We create Token here
-                response.Token = CreateToken(user);
+              
                 response.HasError = false;
                 response.Message = "User Found";
                 response.IdentityNumber = user.IdentityNumber;
                 
+                return response;
+            }
+        }
+
+        public ResponseDto VulnerableLogin(UserForLogin userforlogin)
+        {
+            ResponseDto response = new ResponseDto();
+            var user = _userDal.GetNonSecuredUserByIdentity(userforlogin.IdentityNumber);
+
+            if (user is null)
+            {
+                response.HasError = true;
+                response.Message = "Wrong";
+                return response;
+
+            }
+
+            else if ((userforlogin.Password != user.Password))
+            {
+                response.HasError = true;
+                response.Message = "User Not Found";
+                return response;
+            }
+            else
+            {
+
+               
+                response.HasError = false;
+                response.Message = "User Found";
+                response.IdentityNumber = user.IdentityNumber;
+
                 return response;
             }
         }
@@ -68,8 +98,6 @@ namespace Business.Assignment3
             else
 
             {
-                //RandomPassword = GeneratePassword();
-                //Console.WriteLine(RandomPassword);
 
 
                 CreatePasswordHash(userForRegister.Password, out byte[] passwordHash, out byte[] passwordSalt);
@@ -92,39 +120,7 @@ namespace Business.Assignment3
             var result = _userDal.Insert(user);
             return true;
         }
-        public string GeneratePassword()
-        {
-            string PasswordLength = "8";
-            string NewPassword = "";
-
-            string allowedChars = "";
-            allowedChars = "1,2,3,4,5,6,7,8,9,0";
-            allowedChars += "A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,";//özelkarakter
-            allowedChars += "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,";
-
-
-            char[] sep = {
-            ','
-        };
-            string[] arr = allowedChars.Split(sep);
-
-
-            string IDString = "";
-            string temp = "";
-
-            Random rand = new Random();
-
-            for (int i = 0; i < Convert.ToInt32(PasswordLength); i++)
-            {
-                temp = arr[rand.Next(0, arr.Length)];
-                IDString += temp;
-                NewPassword = IDString;
-
-            }
-
-            return NewPassword;
-        }
-
+         
 
 
         // Hashing functions 
@@ -152,29 +148,37 @@ namespace Business.Assignment3
 
 
 
-        ///Token Function
-
-        private string CreateToken(User user)
+        public bool VulnerableRegister(UserForRegister userForRegister)
         {
+            var user = _userDal.GetNonSecuredUserByIdentity(userForRegister.IdentityNumber);
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Token").Value));
-
-            var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
-
-            var _claims = new[]
+            if (user is not null)
             {
-                new Claim(JwtRegisteredClaimNames.Name, user.UserName),
+                return false;
+            }
 
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
-            };
+            else
 
-            var token = new JwtSecurityToken(claims: _claims,
-                                             expires: DateTime.Now.AddDays(2),
-                                             signingCredentials: cred);
+            {
+                
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+                user = new NonSecuredUser()
+                {
+                    UserName = userForRegister.UserName,
 
+                    IdentityNumber = userForRegister.IdentityNumber,
+
+                    Password = userForRegister.Password
+                };
+
+                user.CreateDate = DateTime.Now;
+
+            }
+            var result = _userDal.InsertNonSecuredUser(user);
+            return true;
         }
+
+
 
     }
 }
